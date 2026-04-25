@@ -1,796 +1,1327 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ETNABYTE GAMES — Indie Game Studio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@300;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --black: #050507;
-      --deep: #0a0a0f;
-      --panel: #0e0e14;
-      --border: rgba(255,255,255,0.07);
-      --red: #c0392b;
-      --red-glow: #e74c3c;
-      --white: #f0ede8;
-      --muted: #7a7a8a;
-      --steam-blue: #1b9edb;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--black);
-      color: var(--white);
-      font-family: 'Barlow', sans-serif;
-      font-weight: 300;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.35;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.4rem 4rem;
-      background: linear-gradient(to bottom, rgba(5,5,7,0.95) 0%, transparent 100%);
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.3s;
-    }
-
-    nav.scrolled { border-color: var(--border); }
-
-    .nav-logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.3rem;
-      letter-spacing: 0.3em;
-      color: var(--white);
-      text-decoration: none;
-    }
-
-    .nav-logo span { color: var(--red-glow); }
-
-    .nav-links {
-      display: flex;
-      gap: 2.5rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--white); }
-
-    /* ── HERO ── */
-    #hero {
-      position: relative;
-      height: 100vh;
-      min-height: 700px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(192,57,43,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(192,57,43,0.05) 0%, transparent 60%),
-        linear-gradient(180deg, #050507 0%, #08080d 100%);
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%);
-    }
-
-    .hero-eyebrow {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      color: var(--red-glow);
-      margin-bottom: 1.5rem;
-      animation: fadeUp 1s ease both;
-    }
-
-    .hero-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(5rem, 14vw, 13rem);
-      line-height: 0.9;
-      letter-spacing: 0.05em;
-      color: var(--white);
-      animation: fadeUp 1s 0.15s ease both;
-    }
-
-    .hero-title .line2 {
-      display: block;
-      color: transparent;
-      -webkit-text-stroke: 1px rgba(240,237,232,0.25);
-    }
-
-    .hero-sub {
-      margin-top: 2rem;
-      font-size: 1rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      max-width: 480px;
-      line-height: 1.7;
-      animation: fadeUp 1s 0.3s ease both;
-    }
-
-    .hero-cta {
-      margin-top: 3rem;
-      display: flex;
-      gap: 1rem;
-      animation: fadeUp 1s 0.45s ease both;
-    }
-
-    .btn {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      padding: 0.9rem 2.2rem;
-      text-decoration: none;
-      border: 1px solid;
-      transition: all 0.25s;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: var(--red);
-      border-color: var(--red);
-      color: var(--white);
-    }
-
-    .btn-primary:hover {
-      background: var(--red-glow);
-      border-color: var(--red-glow);
-      box-shadow: 0 0 30px rgba(231,76,60,0.4);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--muted);
-    }
-
-    .btn-ghost:hover {
-      border-color: rgba(255,255,255,0.3);
-      color: var(--white);
-    }
-
-    .hero-scroll {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      animation: fadeUp 1s 0.8s ease both;
-    }
-
-    .hero-scroll span {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .scroll-line {
-      width: 1px;
-      height: 50px;
-      background: linear-gradient(to bottom, var(--red-glow), transparent);
-      animation: scrollPulse 2s infinite;
-    }
-
-    /* ── GAMES SECTION ── */
-    #games {
-      padding: 8rem 4rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      color: var(--red-glow);
-      margin-bottom: 0.8rem;
-    }
-
-    .section-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(2.5rem, 5vw, 4.5rem);
-      letter-spacing: 0.05em;
-      line-height: 1;
-      margin-bottom: 4rem;
-    }
-
-    /* ── GAME CARD: SILVARN ── */
-    .game-featured {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      margin-bottom: 2px;
-      overflow: hidden;
-      transition: border-color 0.3s;
-    }
-
-    .game-featured:hover { border-color: rgba(192,57,43,0.4); }
-
-    .game-media {
-      position: relative;
-      overflow: hidden;
-      aspect-ratio: 16/10;
-    }
-
-    .game-media iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    .game-media-thumb {
-      position: relative;
-      overflow: hidden;
-      aspect-ratio: 16/10;
-      cursor: pointer;
-    }
-
-    .game-media-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.5s ease;
-      filter: brightness(0.7);
-    }
-
-    .game-media-thumb:hover img { transform: scale(1.04); }
-
-    .play-icon {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.3);
-      transition: background 0.3s;
-    }
-
-    .play-icon:hover { background: rgba(0,0,0,0.1); }
-
-    .play-circle {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-    }
-
-    .play-icon:hover .play-circle {
-      background: var(--red);
-      border-color: var(--red);
-      box-shadow: 0 0 20px rgba(231,76,60,0.5);
-    }
-
-    .play-circle svg { margin-left: 4px; }
-
-    .game-info {
-      padding: 3.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .game-tag {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      color: var(--red-glow);
-      margin-bottom: 1rem;
-    }
-
-    .game-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(2.5rem, 4vw, 4rem);
-      letter-spacing: 0.08em;
-      line-height: 1;
-      margin-bottom: 1.2rem;
-    }
-
-    .game-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--red-glow);
-      animation: pulse 2s infinite;
-    }
-
-    .status-dot.released { background: #2ecc71; animation: none; }
-
-    .game-desc {
-      font-size: 0.95rem;
-      line-height: 1.8;
-      color: rgba(240,237,232,0.65);
-      margin-bottom: 2rem;
-      max-width: 420px;
-    }
-
-    .game-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 2rem;
-    }
-
-    .tag-pill {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 0.3rem 0.8rem;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .game-actions {
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-steam {
-      background: var(--steam-blue);
-      border-color: var(--steam-blue);
-      color: #fff;
-    }
-
-    .btn-steam:hover {
-      background: #23b1f0;
-      border-color: #23b1f0;
-      box-shadow: 0 0 20px rgba(27,158,219,0.4);
-    }
-
-    /* ── SECOND GAME ROW ── */
-    .game-row-two {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-    }
-
-    .game-card-small {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      transition: border-color 0.3s;
-    }
-
-    .game-card-small:hover { border-color: rgba(192,57,43,0.4); }
-
-    .game-card-small .game-media-thumb { aspect-ratio: 16/9; }
-
-    .game-card-small .game-info { padding: 2rem 2.5rem; }
-
-    .game-card-small .game-title { font-size: 2rem; }
-
-    /* ── TRAILER STRIP ── */
-    #trailers {
-      background: var(--deep);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 6rem 4rem;
-    }
-
-    .trailers-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .trailers-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      margin-top: 3rem;
-    }
-
-    .trailer-item {
-      position: relative;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      transition: border-color 0.3s;
-    }
-
-    .trailer-item:hover { border-color: rgba(192,57,43,0.5); }
-
-    .trailer-item iframe {
-      width: 100%;
-      aspect-ratio: 16/9;
-      border: none;
-      display: block;
-    }
-
-    .trailer-label {
-      padding: 1rem 1.2rem;
-      background: var(--panel);
-    }
-
-    .trailer-label p {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .trailer-label h4 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.3rem;
-      letter-spacing: 0.1em;
-      color: var(--white);
-      margin-top: 0.2rem;
-    }
-
-    /* ── ABOUT ── */
-    #about {
-      padding: 8rem 4rem;
-      max-width: 1400px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6rem;
-      align-items: center;
-    }
-
-    .about-text p {
-      font-size: 1.05rem;
-      line-height: 1.9;
-      color: rgba(240,237,232,0.65);
-      margin-bottom: 1.5rem;
-    }
-
-    .about-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .stat-box {
-      border: 1px solid var(--border);
-      padding: 2rem;
-      background: var(--panel);
-    }
-
-    .stat-number {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 3.5rem;
-      color: var(--white);
-      line-height: 1;
-    }
-
-    .stat-number span { color: var(--red-glow); }
-
-    .stat-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 0.5rem;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 3rem 4rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .footer-logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.1rem;
-      letter-spacing: 0.3em;
-      color: var(--muted);
-    }
-
-    .footer-logo span { color: var(--red-glow); }
-
-    .footer-copy {
-      font-size: 0.8rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-    }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes scrollPulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(1); }
-      50%       { opacity: 1;   transform: scaleY(1.1); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
-      nav { padding: 1rem 1.5rem; }
-      .nav-links { display: none; }
-      #games { padding: 5rem 1.5rem; }
-      .game-featured { grid-template-columns: 1fr; }
-      .game-row-two { grid-template-columns: 1fr; }
-      .trailers-grid { grid-template-columns: 1fr; }
-      #about { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
-      #trailers { padding: 5rem 1.5rem; }
-      footer { flex-direction: column; gap: 1rem; text-align: center; padding: 2rem 1.5rem; }
-    }
-  </style>
-</head>
-<body>
-
-<!-- NAV -->
-<nav id="nav">
-  <a href="#" class="nav-logo">ETNA<span>BYTE</span></a>
-  <ul class="nav-links">
-    <li><a href="#games">Games</a></li>
-    <li><a href="#trailers">Trailers</a></li>
-    <li><a href="#about">Studio</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <p class="hero-eyebrow">Indie Game Studio</p>
-  <h1 class="hero-title">
-    ETNABYTE
-    <span class="line2">GAMES</span>
-  </h1>
-  <p class="hero-sub">Crafting dark, story-driven experiences that linger long after the screen goes black.</p>
-  <div class="hero-cta">
-    <a href="#games" class="btn btn-primary">Explore Games</a>
-    <a href="https://store.steampowered.com/search/?developer=Etnabyte%20Games" target="_blank" class="btn btn-ghost">Steam Page</a>
-  </div>
-  <div class="hero-scroll">
-    <div class="scroll-line"></div>
-    <span>Scroll</span>
-  </div>
-</section>
-
-<!-- GAMES -->
-<section id="games">
-  <p class="section-label">Our Games</p>
-  <h2 class="section-title">Worlds of Dread</h2>
-
-  <!-- SILVARN — featured -->
-  <div class="game-featured">
-    <div class="game-media-thumb" onclick="openTrailer('https://www.youtube.com/embed/NR9Yu_NqJeM?autoplay=1', this)">
-      <img
-        src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4225020/083da1887c91731a7a43652288502127215f5735/header.jpg?t=1772537659"
-        alt="SILVARN"
-        onerror="this.src='https://via.placeholder.com/800x500/0a0a0f/c0392b?text=SILVARN'"
-      />
-      <div class="play-icon">
-        <div class="play-circle">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Etnabyte Games — Indie Game Studio</title>
+    <link rel="icon" type="image/png" href="Etna/LogoPng.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #080a0f;
+        --surface: #0d1117;
+        --card: #111620;
+        --border: #1e2736;
+        --accent: #c8a96e;
+        --accent2: #7b5ea7;
+        --text: #e8eaf0;
+        --muted: #7a8498;
+        --red: #c0392b;
+      }
+
+      /* Recommended Lenis CSS */
+      html.lenis, html.lenis body {
+        height: auto;
+        width: 100%;
+      }
+      .lenis.lenis-smooth {
+        scroll-behavior: auto !important;
+      }
+      .lenis.lenis-smooth [data-lenis-prevent] {
+        overscroll-behavior: contain;
+      }
+      .lenis.lenis-stopped {
+        overflow: hidden;
+      }
+      .lenis.lenis-scrolling iframe {
+        pointer-events: none;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* ── NAV ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 2rem;
+        background: rgba(8, 10, 15, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav-logo img {
+        height: 75px;
+        transition: transform 0.3s ease;
+      }
+      .nav-logo:hover img {
+        transform: scale(1.05);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2.5rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        transition: color 0.25s;
+      }
+
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+
+      /* ── HERO ── */
+      .hero {
+        position: relative;
+        height: 100vh;
+        min-height: 800px;
+        background: #020202;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        overflow: hidden;
+      }
+
+      .marquee-wrapper {
+        position: absolute;
+        top: 35%;
+        left: 0;
+        width: 100%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        white-space: nowrap;
+        user-select: none;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 1;
+      }
+
+      .marquee-track {
+        display: flex;
+        gap: 5rem;
+        will-change: transform;
+      }
+
+      .marquee-track img {
+        height: 40vh;
+        min-height: 250px;
+        object-fit: contain;
+      }
+
+      .hero-character {
+        position: absolute;
+        bottom: -2vh;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        height: 120vh;
+        max-height: none;
+        object-fit: contain;
+        pointer-events: none;
+      }
+
+      .hero-fade {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30vh;
+        background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+        z-index: 3;
+        pointer-events: none;
+      }
+
+      /* ── SHOWCASE GRID ── */
+      .showcase-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: auto auto;
+        gap: 1.25rem;
+        margin-bottom: 3.5rem;
+      }
+      .showcase-item {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--border);
+        aspect-ratio: 16/9;
+        cursor: pointer;
+      }
+      .showcase-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+      }
+      .showcase-item:hover img {
+        transform: scale(1.04);
+      }
+
+      /* ── LIGHTBOX (WIDGET STYLE) ── */
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        backdrop-filter: blur(4px);
+        transition: opacity 0.3s ease;
+      }
+      .lightbox.active {
+        display: flex;
+      }
+      .lightbox-content {
+        position: relative;
+        background: #0a0c10;
+        padding: 8px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        max-width: 80vw;
+        max-height: 80vh;
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: flex;
+        flex-direction: column;
+      }
+      .lightbox.active .lightbox-content {
+        transform: scale(1);
+      }
+      .lightbox-content img {
+        width: 100%;
+        height: auto;
+        max-height: calc(85vh - 20px);
+        object-fit: contain;
+        border-radius: 6px;
+        display: block;
+      }
+      .lightbox-close {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        color: #000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        z-index: 2001;
+        transition: transform 0.2s;
+      }
+      .lightbox-close:hover {
+        transform: scale(1.1);
+      }
+      .showcase-item.large {
+        grid-column: span 2;
+        grid-row: span 2;
+        aspect-ratio: auto;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.75rem 2rem;
+        border-radius: 4px;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        cursor: pointer;
+        border: none;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #080a0f;
+        box-shadow: 0 0 24px rgba(200, 169, 110, 0.35);
+      }
+
+      .btn-primary:hover {
+        box-shadow: 0 0 36px rgba(200, 169, 110, 0.55);
+      }
+
+      .btn-outline {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      .btn-outline:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .btn-steam {
+        background: #1b2838;
+        color: #c6d4df;
+        border: 1px solid #2a3f5f;
+      }
+
+      .btn-steam:hover {
+        background: #2a475e;
+        box-shadow: 0 0 20px rgba(42, 71, 94, 0.6);
+      }
+
+      /* steam icon svg inline */
+      .icon-steam {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+      }
+
+      /* ── SECTION COMMON ── */
+      section {
+        padding: 4rem 2rem;
+      }
+
+      .section-label {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.2rem;
+      }
+
+      .section-title {
+        font-family: "Rajdhani", sans-serif;
+        font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .divider {
+        width: 60px;
+        height: 2px;
+        background: var(--accent);
+        margin: 0.5rem auto 0.75rem;
+      }
+
+      /* ── GAMES SECTION ── */
+      #games {
+        background: var(--surface);
+      }
+
+      .games-header {
+        text-align: center;
+        margin-bottom: 0.25rem;
+      }
+
+      /* ── GAME CARD ── */
+      .game-block {
+        max-width: 1200px;
+        margin: 0 auto 1rem;
+      }
+
+      .game-block:last-child {
+        margin-bottom: 0;
+      }
+
+      .game-hero-img {
+        position: relative;
+        width: 100%;
+        height: 100px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.25rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .game-hero-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+      }
+
+      .game-hero-img:hover img {
+        transform: scale(1.03);
+      }
+
+      .game-hero-img .game-badge {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        background: rgba(8, 10, 15, 0.75);
+        backdrop-filter: blur(6px);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.35rem 0.9rem;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .game-layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 1.25rem;
+        align-items: start;
+      }
+
+      .game-title {
+        font-family: "Rajdhani", sans-serif;
+        font-size: clamp(2.4rem, 4vw, 3.5rem);
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 1.2rem;
+      }
+
+      .game-desc {
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.8;
+        margin-bottom: 1.8rem;
+      }
+
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .tag {
+        padding: 0.25rem 0.75rem;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-family: "Rajdhani", sans-serif;
+        letter-spacing: 0.05em;
+      }
+
+      .game-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      /* sidebar */
+      .game-sidebar {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.75rem;
+      }
+
+      .sidebar-title {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1.25rem;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-label {
+        color: var(--muted);
+      }
+      .info-val {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* ── TRAILERS ── */
+      .trailers-section {
+        margin-top: 2rem;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .trailers-label {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.75rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1.25rem;
+      }
+
+      .trailers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .trailer-wrap {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        aspect-ratio: 16/9;
+        position: relative;
+        cursor: pointer;
+        display: block;
+        text-decoration: none;
+      }
+
+      .trailer-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition:
+          transform 0.4s ease,
+          filter 0.4s ease;
+        filter: brightness(0.85);
+      }
+
+      .trailer-wrap:hover img {
+        transform: scale(1.03);
+        filter: brightness(0.65);
+      }
+
+      .trailer-play {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+      }
+
+      .trailer-play-btn {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: rgba(255, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.2s,
+          background 0.2s;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+      }
+
+      .trailer-wrap:hover .trailer-play-btn {
+        transform: scale(1.12);
+        background: #ff0000;
+      }
+
+      .trailer-play-btn svg {
+        width: 28px;
+        height: 28px;
+        fill: #fff;
+        margin-left: 4px;
+      }
+
+      .trailer-play-label {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.75);
+      }
+
+      /* ── ABOUT ── */
+      #about {
+        background: var(--bg);
+        text-align: center;
+      }
+
+      .about-inner {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      .about-logo {
+        height: 80px;
+        margin-bottom: 2rem;
+      }
+
+      .about-text {
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.9;
+        margin-bottom: 2rem;
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 4rem 3rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 2.5rem;
+      }
+
+      .footer-logo img {
+        height: 120px;
+        opacity: 1;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .footer-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: color 0.2s;
+      }
+
+      .footer-links a:hover {
+        color: var(--accent);
+      }
+
+      .footer-copy {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      /* ── SCROLL ANIMATIONS ── */
+
+      /* base hidden state */
+      [data-anim] {
+        opacity: 1;
+        will-change: transform, opacity;
+      }
+
+      /* fade-up */
+      [data-anim="fade-up"] {
+        transform: translateY(48px);
+        transition:
+          opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* fade-down */
+      [data-anim="fade-down"] {
+        transform: translateY(-40px);
+        transition:
+          opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* fade-left */
+      [data-anim="fade-left"] {
+        transform: translateX(-56px);
+        transition:
+          opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* fade-right */
+      [data-anim="fade-right"] {
+        transform: translateX(56px);
+        transition:
+          opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* scale-up */
+      [data-anim="scale-up"] {
+        transform: scale(0.88);
+        transition:
+          opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* clip wipe (removed) */
+      [data-anim="wipe"] {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+      }
+      /* glitch title */
+      [data-anim="glitch"] {
+        transition: opacity 0.01s;
+      }
+
+      /* visible state */
+      [data-anim].anim-in {
+        opacity: 1;
+        transform: none;
+        clip-path: inset(0 0% 0 0);
+      }
+
+      /* stagger children */
+      [data-stagger] > * {
+        opacity: 1;
+        transform: translateY(20px) scale(0.95);
+        transition:
+          opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      [data-stagger].anim-in > * {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* divider line draw */
+      .divider {
+        transform-origin: left center;
+        transform: scaleX(0);
+        transition: transform 0.7s cubic-bezier(0.77, 0, 0.18, 1) 0.3s;
+      }
+      .divider.anim-in {
+        transform: scaleX(1);
+      }
+
+      /* nav scroll shrink */
+      nav.scrolled {
+        padding-top: 0.6rem;
+        padding-bottom: 0.6rem;
+        box-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+      }
+      nav {
+        transition:
+          padding 0.35s ease,
+          box-shadow 0.35s ease;
+      }
+
+      /* hero content entrance */
+      .hero-content > * {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: heroIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .hero-content > *:nth-child(1) {
+        animation-delay: 0.2s;
+      }
+      .hero-content > *:nth-child(2) {
+        animation-delay: 0.38s;
+      }
+      .hero-content > *:nth-child(3) {
+        animation-delay: 0.54s;
+      }
+      .hero-content > *:nth-child(4) {
+        animation-delay: 0.68s;
+      }
+      .hero-content > *:nth-child(5) {
+        animation-delay: 0.8s;
+      }
+
+      @keyframes heroIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* hero bg slow drift */
+      .hero-bg {
+        animation: bgDrift 22s ease-in-out infinite alternate;
+      }
+      @keyframes bgDrift {
+        from {
+          transform: scale(1.04) translate(0, 0);
+        }
+        to {
+          transform: scale(1.09) translate(-1.5%, -1%);
+        }
+      }
+
+      /* glitch keyframes */
+      @keyframes glitchIn {
+        0% {
+          opacity: 0;
+          clip-path: inset(40% 0 40% 0);
+          transform: skewX(-8deg) translateX(-8px);
+        }
+        15% {
+          opacity: 1;
+          clip-path: inset(0 0 0 0);
+          transform: skewX(4deg) translateX(4px);
+        }
+        25% {
+          clip-path: inset(60% 0 10% 0);
+          transform: skewX(-3deg) translateX(-3px);
+        }
+        35% {
+          clip-path: inset(0 0 0 0);
+          transform: skewX(0deg) translateX(0);
+        }
+        50% {
+          clip-path: inset(20% 0 50% 0);
+          transform: skewX(2deg);
+        }
+        65% {
+          clip-path: inset(0 0 0 0);
+          transform: none;
+        }
+        80% {
+          clip-path: inset(5% 0 80% 0);
+          transform: skewX(-1deg);
+        }
+        100% {
+          opacity: 1;
+          clip-path: inset(0 0 0 0);
+          transform: none;
+        }
+      }
+
+      [data-anim="glitch"].anim-in {
+        opacity: 1;
+        animation: glitchIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      /* accent line that draws under section-label */
+      .section-label {
+        position: relative;
+        display: inline-block;
+      }
+      .section-label::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -4px;
+        width: 100%;
+        height: 1px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.6s cubic-bezier(0.77, 0, 0.18, 1) 0.5s;
+      }
+      [data-anim].anim-in .section-label::after,
+      .section-label.anim-in::after {
+        transform: scaleX(1);
+      }
+
+      /* old .reveal compat */
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 900px) {
+        nav {
+          padding: 1rem 1.5rem;
+        }
+        .nav-links {
+          gap: 1.5rem;
+        }
+        .game-layout {
+          grid-template-columns: 1fr;
+        }
+        .game-hero-img {
+          height: 280px;
+        }
+        .trailers-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        nav {
+          padding: 0.85rem 1rem;
+        }
+        .nav-links {
+          display: none;
+        }
+        .game-hero-img {
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── NAV ── -->
+    <nav>
+      <a class="nav-logo" href="#"
+        ><img src="Etna/Etnabyte logo.png" alt="Etnabyte Games"
+      /></a>
+      <ul class="nav-links">
+        <li><a href="#games">Games</a></li>
+        <li><a href="#about">About</a></li>
+        <li>
+          <a
+            href="https://store.steampowered.com/search/?developer=Etnabyte%20Games"
+            target="_blank"
+            rel="noopener"
+            >Steam</a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+      <div class="marquee-wrapper">
+        <div class="marquee-track" id="marquee-track">
+          <img src="Etna/Silvarn Logo.png" alt="SILVARN" />
+          <img src="Etna/Silvarn Logo.png" alt="SILVARN" />
+          <img src="Etna/Silvarn Logo.png" alt="SILVARN" />
+          <img src="Etna/Silvarn Logo.png" alt="SILVARN" />
+          <img src="Etna/Silvarn Logo.png" alt="SILVARN" />
+          <img src="Etna/Silvarn Logo.png" alt="SILVARN" />
         </div>
       </div>
-    </div>
-    <div class="game-info">
-      <p class="game-tag">Featured — Coming 2026</p>
-      <h3 class="game-title">SILVARN</h3>
-      <div class="game-status">
-        <span class="status-dot"></span>
-        In Development · Psychological Horror
-      </div>
-      <p class="game-desc">Your family's cry for help pulls you into a nightmare where every moment counts. A relentless killer forces you to keep moving as you search for answers. Collect clues, solve disturbing puzzles, and uncover the terrifying truth hiding behind the fear.</p>
-      <div class="game-tags">
-        <span class="tag-pill">First-Person</span>
-        <span class="tag-pill">Psychological Horror</span>
-        <span class="tag-pill">Story Rich</span>
-        <span class="tag-pill">Multiple Endings</span>
-        <span class="tag-pill">1990s</span>
-      </div>
-      <div class="game-actions">
-        <a href="https://store.steampowered.com/app/4225020/SILVARN" target="_blank" class="btn btn-steam">Wishlist on Steam</a>
-      </div>
-    </div>
-  </div>
+      <img src="Etna/pngSilvarn.png" class="hero-character" alt="Silvarn Characters" />
+      <div class="hero-fade"></div>
+    </section>
 
-  <!-- THE DEATHMIND -->
-  <div class="game-row-two" style="margin-top:2px;">
-    <div class="game-card-small">
-      <div class="game-media-thumb" onclick="openTrailer('https://www.youtube.com/embed/qvfDJ7DVREs?autoplay=1', this)">
-        <img
-          src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3850620/header.jpg"
-          alt="The Deathmind"
-          onerror="this.src='https://via.placeholder.com/800x450/0a0a0f/c0392b?text=The+Deathmind'"
-        />
-        <div class="play-icon">
-          <div class="play-circle">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+    <!-- ── GAMES ── -->
+    <section id="games">
+      <div class="games-header" data-anim="fade-up">
+        <p class="section-label">Our Games</p>
+        <h2 class="section-title">Titles from the Studio</h2>
+        <div class="divider"></div>
+      </div>
+
+      <!-- ─── SILVARN ─── -->
+      <div class="game-block" style="margin-top: 4rem;">
+        <h2 class="game-title" data-anim="glitch" style="text-align: center; font-size: clamp(3rem, 6vw, 4.5rem); margin-bottom: 2rem;">SILVARN</h2>
+        
+        <div class="showcase-grid">
+          <div class="showcase-item large">
+            <img src="Etna/SilvarnScreenshot/1.png" alt="Silvarn Screenshot 1" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/SilvarnScreenshot/2.png" alt="Silvarn Screenshot 2" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/SilvarnScreenshot/3.png" alt="Silvarn Screenshot 3" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/SilvarnScreenshot/4.png" alt="Silvarn Screenshot 4" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/SilvarnScreenshot/5.png" alt="Silvarn Screenshot 5" loading="lazy" />
+          </div>
+        </div>
+
+        <div class="game-layout">
+          <div class="game-info">
+            <p class="game-desc" data-anim="fade-up" data-delay="100">
+              Jacob arrives at his family's home after they plead for rescue
+              from unexplained deaths. He discovers the house empty — scattered
+              belongings, signs of struggle. A psychologically unstable man
+              convinced residents are cursed has taken them. Jacob soon
+              discovers a mysterious elevator that connects random locations. He
+              must navigate through this strange mechanism while being
+              relentlessly pursued by the killer
+              <strong>Silvarn</strong> through dark corridors and uncertain
+              escape routes.<br /><br />
+              A relentless killer forces you to keep moving as you search for
+              answers. Collect clues, solve disturbing puzzles, and uncover the
+              terrifying truth hiding behind the fear.
+            </p>
+            <div class="tag-list" data-stagger data-delay="200">
+              <span class="tag">Psychological Horror</span>
+              <span class="tag">Thriller</span>
+              <span class="tag">First-Person</span>
+              <span class="tag">Multiple Endings</span>
+              <span class="tag">Atmospheric</span>
+              <span class="tag">Story Rich</span>
+              <span class="tag">Dark Fantasy</span>
+              <span class="tag">1990's</span>
+            </div>
+            <div class="game-actions" data-anim="fade-up" data-delay="350">
+              <a
+                href="https://store.steampowered.com/app/4225020/SILVARN"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-steam"
+                style="padding: 0.75rem 2rem; font-size: 1rem; border-radius: 4px; text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;"
+              >
+                View on Steam
+              </a>
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Trailer -->
+            <div class="trailers-section" style="margin-top: 0; max-width: 100%;">
+              <a
+                class="trailer-wrap"
+                href="https://www.youtube.com/watch?v=NR9Yu_NqJeM"
+                target="_blank"
+                rel="noopener"
+              >
+                <img src="https://img.youtube.com/vi/NR9Yu_NqJeM/maxresdefault.jpg" alt="Official Trailer" loading="lazy" />
+                <div class="trailer-play">
+                  <div class="trailer-play-btn"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg></div>
+                </div>
+              </a>
+            </div>
+
+            <!-- Details Sidebar -->
+            <div class="game-sidebar" data-anim="fade-left" data-delay="150">
+              <p class="sidebar-title">Game Details</p>
+              <div class="info-row">
+                <span class="info-label">Developer</span><span class="info-val">Etnabyte Games</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Publisher</span><span class="info-val">Etnabyte Games</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Release</span><span class="info-val">2026</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Genre</span><span class="info-val">Horror / Thriller</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="game-info">
-        <p class="game-tag">Released · Psychological Horror</p>
-        <h3 class="game-title">The Deathmind</h3>
-        <div class="game-status">
-          <span class="status-dot released"></span>
-          Available Now · Positive Reviews
+
+      <!-- ─── THE DEATHMIND ─── -->
+      <div class="game-block" style="margin-top: 6rem;">
+        <h2 class="game-title" data-anim="glitch" style="text-align: center; font-size: clamp(3rem, 6vw, 4.5rem); margin-bottom: 2rem;">The Deathmind</h2>
+        
+        <div class="showcase-grid">
+          <div class="showcase-item large">
+            <img src="Etna/TheDeathmindScreenshot/1.jpg" alt="The Deathmind Screenshot 1" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/TheDeathmindScreenshot/2.jpg" alt="The Deathmind Screenshot 2" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/TheDeathmindScreenshot/3.jpg" alt="The Deathmind Screenshot 3" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/TheDeathmindScreenshot/4.jpg" alt="The Deathmind Screenshot 4" loading="lazy" />
+          </div>
+          <div class="showcase-item">
+            <img src="Etna/TheDeathmindScreenshot/5.jpg" alt="The Deathmind Screenshot 5" loading="lazy" />
+          </div>
         </div>
-        <p class="game-desc" style="font-size:0.9rem;">A psychological horror experience that confronts the darkest corners of the human mind. Available now on Steam.</p>
-        <div class="game-tags">
-          <span class="tag-pill">Horror</span>
-          <span class="tag-pill">Psychological</span>
-          <span class="tag-pill">Indie</span>
-        </div>
-        <div class="game-actions">
-          <a href="https://store.steampowered.com/app/3850620/The_Deathmind/" target="_blank" class="btn btn-steam">Buy on Steam</a>
+
+        <div class="game-layout">
+          <div class="game-info">
+            <p class="game-desc" data-anim="fade-up" data-delay="100">
+              <em>"You are not lost in a village. You are lost in your own mind."</em><br /><br />
+              Trapped in a forgotten village, you search for a missing wife —
+              only to uncover echoes of a life that may never have existed.
+              Unravel memories, decipher cryptic notes, and navigate a
+              deteriorating psyche across three atmospheric chapters. Puzzles
+              like <strong>Upside Down</strong> and
+              <strong>Death Cycle</strong> challenge perception itself as the
+              line between reality and madness dissolves.<br /><br />
+              A psychological horror game where environmental puzzles and
+              fractured memory collide to reveal an unsettling truth.
+            </p>
+            <div class="tag-list" data-stagger data-delay="200">
+              <span class="tag">Psychological Horror</span>
+              <span class="tag">Puzzle</span>
+              <span class="tag">First-Person</span>
+              <span class="tag">Mystery</span>
+              <span class="tag">Atmospheric</span>
+              <span class="tag">Surreal</span>
+              <span class="tag">Gothic</span>
+              <span class="tag">Dark Fantasy</span>
+            </div>
+            <div class="game-actions" data-anim="fade-up" data-delay="350">
+              <a
+                href="https://store.steampowered.com/app/3850620/The_Deathmind/"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-steam"
+                style="padding: 0.75rem 2rem; font-size: 1rem; border-radius: 4px; text-decoration: none; font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;"
+              >
+                View on Steam
+              </a>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Trailer -->
+            <div class="trailers-section" style="margin-top: 0; max-width: 100%;">
+              <a
+                class="trailer-wrap"
+                href="https://www.youtube.com/watch?v=qvfDJ7DVREs"
+                target="_blank"
+                rel="noopener"
+              >
+                <img src="https://img.youtube.com/vi/qvfDJ7DVREs/maxresdefault.jpg" alt="Official Trailer" loading="lazy" />
+                <div class="trailer-play">
+                  <div class="trailer-play-btn"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg></div>
+                </div>
+              </a>
+            </div>
+
+            <!-- Details Sidebar -->
+            <div class="game-sidebar" data-anim="fade-left" data-delay="150">
+              <p class="sidebar-title">Game Details</p>
+              <div class="info-row">
+                <span class="info-label">Developer</span><span class="info-val">Etnabyte Games</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Publisher</span><span class="info-val">Etnabyte Games</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Release</span><span class="info-val">August 8, 2025</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Genre</span><span class="info-val">Horror / Puzzle</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="game-card-small" style="background: var(--deep); display:flex; align-items:center; justify-content:center; border: 1px dashed rgba(255,255,255,0.06); min-height: 300px;">
-      <div style="text-align:center; padding: 3rem;">
-        <p style="font-family:'Bebas Neue',sans-serif; font-size:3rem; color:rgba(255,255,255,0.08); letter-spacing:0.1em;">???</p>
-        <p style="font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); margin-top:1rem;">Next Project · TBA</p>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- TRAILERS -->
-<section id="trailers">
-  <div class="trailers-inner">
-    <p class="section-label">Trailers</p>
-    <h2 class="section-title">Watch the Fear</h2>
-    <div class="trailers-grid">
-      <div class="trailer-item">
-        <iframe src="https://www.youtube.com/embed/NR9Yu_NqJeM" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy"></iframe>
-        <div class="trailer-label">
-          <p>Trailer 1</p>
-          <h4>SILVARN</h4>
+    <!-- ── ABOUT ── -->
+    <section id="about">
+      <div class="about-inner">
+        <p class="section-label" data-anim="fade-up" data-delay="100">About</p>
+        <h2 class="section-title" data-anim="fade-up" data-delay="180">
+          Etnabyte Games
+        </h2>
+        <div class="divider" data-anim="fade-up" data-delay="240"></div>
+        <p class="about-text" data-anim="fade-up" data-delay="320">
+          Etnabyte Games is an independent game studio founded in 2025 in
+          Antalya, Türkiye. The studio develops all of its games independently,
+          focusing on atmospheric and psychological experiences. It has released
+          two titles so far: SILVARN and The Deathmind. The company aims to
+          expand into future online and multiplayer projects while continuing
+          its independent development approach.
+        </p>
+        <a
+          href="mailto:contact@etnabytegames.com"
+          target="_top"
+          data-anim="fade-up"
+          data-delay="400"
+          style="
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            font-family: &quot;Rajdhani&quot;, sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(200, 169, 110, 0.3);
+            padding-bottom: 0.2rem;
+            transition: border-color 0.2s;
+          "
+          onmouseover="this.style.borderColor = 'var(--accent)'"
+          onmouseout="this.style.borderColor = 'rgba(200,169,110,.3)'"
+          >contact@etnabytegames.com</a
+        >
+
+        <div
+          style="
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+          "
+        >
+          <a
+            href="https://store.steampowered.com/search/?developer=Etnabyte%20Games"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-steam"
+          >
+            <svg class="icon-steam" viewBox="0 0 24 24">
+              <path
+                d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.455 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"
+              />
+            </svg>
+            Steam Store
+          </a>
+          <a
+            href="https://www.youtube.com/@EtnaByteGames"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-outline"
+            >YouTube</a
+          >
         </div>
       </div>
-      <div class="trailer-item">
-        <iframe src="https://www.youtube.com/embed/8TlElyZx-98" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy"></iframe>
-        <div class="trailer-label">
-          <p>Trailer 2</p>
-          <h4>SILVARN</h4>
-        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <div class="footer-logo">
+        <img src="Etna/Etnabyte logo.png" alt="Etnabyte Games" />
       </div>
-      <div class="trailer-item">
-        <iframe src="https://www.youtube.com/embed/qvfDJ7DVREs" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" loading="lazy"></iframe>
-        <div class="trailer-label">
-          <p>Trailer</p>
-          <h4>The Deathmind</h4>
+      <ul class="footer-links">
+        <li><a href="#games">Games</a></li>
+        <li><a href="#about">About</a></li>
+        <li>
+          <a
+            href="https://store.steampowered.com/search/?developer=Etnabyte%20Games"
+            target="_blank"
+            rel="noopener"
+            >Steam</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.youtube.com/@EtnaByteGames"
+            target="_blank"
+            rel="noopener"
+            >YouTube</a
+          >
+        </li>
+      </ul>
+      <p class="footer-copy">© 2025 Etnabyte Games. All rights reserved.</p>
+    </footer>
+
+    <script>
+      // ── Lenis smooth scroll ──
+      const lenis = new Lenis({
+        duration: 1.5,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        wheelMultiplier: 1.2,
+        syncTouch: true,
+      });
+
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+
+      // anchor links through Lenis
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          const target = document.querySelector(a.getAttribute("href"));
+          if (target) lenis.scrollTo(target, { offset: -80 });
+        });
+      });
+
+      // ── NAV shrink on scroll ──
+      const nav = document.querySelector("nav");
+      const marqueeTrack = document.getElementById("marquee-track");
+
+      lenis.on("scroll", ({ scroll }) => {
+        nav.classList.toggle("scrolled", scroll > 60);
+        
+        if (marqueeTrack) {
+          // move the marquee text backwards based on scroll progress
+          const offset = scroll * 0.45; 
+          marqueeTrack.style.transform = `translate3d(-${offset}px, 0, 0)`;
+        }
+      });
+
+      // ── Intersection observer for [data-anim] and [data-stagger] ──
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            const delay = parseInt(el.dataset.delay || 0);
+
+            setTimeout(() => {
+              el.classList.add("anim-in");
+
+              // stagger children
+              if (el.hasAttribute("data-stagger")) {
+                el.querySelectorAll(":scope > *").forEach((child, i) => {
+                  child.style.transitionDelay = `${i * 80}ms`;
+                });
+              }
+            }, delay);
+
+            io.unobserve(el);
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+      );
+
+      document
+        .querySelectorAll("[data-anim], [data-stagger]")
+        .forEach((el) => io.observe(el));
+
+      // ── Lightbox Implementation ──
+      const lightbox = document.createElement('div');
+      lightbox.className = 'lightbox';
+      lightbox.innerHTML = `
+        <div class="lightbox-content">
+          <div class="lightbox-close">&times;</div>
+          <img src="" alt="Enlarged view">
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+      `;
+      document.body.appendChild(lightbox);
 
-<!-- ABOUT -->
-<section id="about">
-  <div class="about-text">
-    <p class="section-label">The Studio</p>
-    <h2 class="section-title" style="margin-bottom:2rem;">Built on<br>Darkness</h2>
-    <p>Etnabyte Games is a solo indie game studio crafting psychological horror experiences. Every game is built from the ground up — design, code, art, and story — by a single developer with an obsession for atmosphere and narrative depth.</p>
-    <p>Based in Antalya, Turkey. Powered by Unreal Engine 5. Driven by the belief that the most terrifying stories are the ones that feel real.</p>
-    <div style="margin-top:2rem;">
-      <a href="https://store.steampowered.com/search/?developer=Etnabyte%20Games" target="_blank" class="btn btn-primary">View on Steam</a>
-    </div>
-  </div>
-  <div class="about-stats">
-    <div class="stat-box">
-      <div class="stat-number">2<span>+</span></div>
-      <p class="stat-label">Games Published</p>
-    </div>
-    <div class="stat-box">
-      <div class="stat-number"><span>#</span>1</div>
-      <p class="stat-label">Solo Developer</p>
-    </div>
-    <div class="stat-box">
-      <div class="stat-number">UE<span>5</span></div>
-      <p class="stat-label">Unreal Engine</p>
-    </div>
-    <div class="stat-box">
-      <div class="stat-number">2<span>0</span>26</div>
-      <p class="stat-label">SILVARN Release</p>
-    </div>
-  </div>
-</section>
+      const lbImg = lightbox.querySelector('img');
+      const closeBtn = lightbox.querySelector('.lightbox-close');
 
-<!-- FOOTER -->
-<footer>
-  <p class="footer-logo">ETNA<span>BYTE</span> GAMES</p>
-  <p class="footer-copy">© 2025 Etnabyte Games. All rights reserved.</p>
-</footer>
+      document.querySelectorAll('.showcase-item img').forEach(img => {
+        img.addEventListener('click', () => {
+          lbImg.src = img.src;
+          lightbox.classList.add('active');
+          lenis.stop();
+        });
+      });
 
-<script>
-  // Nav scroll effect
-  const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 50);
-  });
-
-  // Play trailer inline
-  function openTrailer(src, el) {
-    const iframe = document.createElement('iframe');
-    iframe.src = src;
-    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;position:absolute;inset:0;';
-    iframe.allow = 'autoplay; encrypted-media';
-    iframe.allowFullscreen = true;
-    el.style.position = 'relative';
-    el.innerHTML = '';
-    el.appendChild(iframe);
-  }
-</script>
-</body>
+      // Close on background click
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target === closeBtn) {
+          lightbox.classList.remove('active');
+          lenis.start();
+        }
+      });
+    </script>
+    <div class="lightbox"></div>
+  </body>
 </html>
